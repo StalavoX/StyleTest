@@ -109,3 +109,4 @@ project/
 - `npm run build`: Compila y genera el paquete de producción en la carpeta `dist/`.
 - `npm run preview`: Previsualiza la build de producción.
 - `npm run typecheck`: Verifica que no existan errores de tipos en TypeScript.
+ 
