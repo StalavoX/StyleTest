@@ -1,33 +1,32 @@
 /**
  * Pantalla de Autenticación (AuthScreen).
- * Permite a los usuarios iniciar sesión, registrarse, recuperar su contraseña
- * e ingresar mediante simulación de Google OAuth.
+ * Permite a los usuarios iniciar sesión, registrarse como clientes con campos completos
+ * (Usuario, Nombres, Apellidos, Cédula, Fecha de Nacimiento, Correo y Contraseña),
+ * validar errores y simular autenticación con Google OAuth.
  */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Scissors, Mail, Lock, User as UserIcon, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Scissors, Mail, Lock, User as UserIcon, Eye, EyeOff, AlertCircle, CheckCircle2, IdCard, Calendar, AtSign } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
-import type { Role } from '@/types';
-
-// Traducción para mostrar los nombres de los roles en la selección de tipo de cuenta
-const roleLabels: Record<Role, string> = {
-  CLIENT: 'Cliente',
-  BARBER: 'Barbero',
-  ADMIN: 'Administrador',
-};
 
 export function AuthScreen() {
   const { login, register, loginWithGoogle, resetPassword } = useAuth();
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [name, setName] = useState('');
+
+  // Campos para Registro de Usuario / Cliente
+  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [cedula, setCedula] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<Role>('CLIENT');
+
   const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -35,16 +34,65 @@ export function AuthScreen() {
   const [googleOpen, setGoogleOpen] = useState(false);
   const [selectedGoogleEmail, setSelectedGoogleEmail] = useState<string | null>(null);
 
+  // Validador de formulario de registro
+  const validateRegister = (): string[] => {
+    const errs: string[] = [];
+    if (!username.trim()) errs.push('El nombre de usuario es obligatorio.');
+    else if (username.trim().length < 3) errs.push('El usuario debe tener al menos 3 caracteres.');
+
+    if (!firstName.trim()) errs.push('El campo de nombres es obligatorio.');
+    if (!lastName.trim()) errs.push('El campo de apellidos es obligatorio.');
+
+    if (!cedula.trim()) errs.push('La cédula de ciudadanía es obligatoria.');
+    else if (!/^\d{5,12}$/.test(cedula.trim())) errs.push('La cédula debe ser numérica (entre 5 y 12 dígitos).');
+
+    if (!birthDate) errs.push('La fecha de nacimiento es obligatoria.');
+
+    if (!email.trim()) errs.push('El correo electrónico es obligatorio.');
+    else if (!/\S+@\S+\.\S+/.test(email)) errs.push('El formato del correo electrónico es inválido.');
+
+    if (!password) errs.push('La contraseña es obligatoria.');
+    else if (password.length < 6) errs.push('La contraseña debe tener al menos 6 caracteres.');
+
+    return errs;
+  };
+
   // Procesa el envío del formulario de inicio de sesión o registro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrors([]);
+
+    if (mode === 'register') {
+      const valErrors = validateRegister();
+      if (valErrors.length > 0) {
+        setErrors(valErrors);
+        return;
+      }
+    } else {
+      if (!email.trim() || !password) {
+        setErrors(['Por favor ingresa tu correo y contraseña.']);
+        return;
+      }
+    }
+
     setLoading(true);
-    const result = mode === 'login'
-      ? await login(email, password)
-      : await register(name, email, password, role);
-    setLoading(false);
-    if (!result.success) setError(result.error || 'Ocurrió un error inesperado');
+    if (mode === 'login') {
+      const result = await login(email, password);
+      setLoading(false);
+      if (!result.success) setErrors([result.error || 'Ocurrió un error al iniciar sesión']);
+    } else {
+      const result = await register({
+        username,
+        firstName,
+        lastName,
+        cedula,
+        birthDate,
+        email,
+        password,
+      });
+      setLoading(false);
+      if (!result.success) setErrors([result.error || 'Ocurrió un error al crear la cuenta']);
+    }
   };
 
   // Abre el popup simulado de Google para seleccionar cuenta
@@ -84,10 +132,10 @@ export function AuthScreen() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-md"
+        className="relative w-full max-w-md my-8"
       >
         {/* Logotipo y Título */}
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-6">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -107,7 +155,8 @@ export function AuthScreen() {
             {(['login', 'register'] as const).map(m => (
               <button
                 key={m}
-                onClick={() => { setMode(m); setError(''); }}
+                type="button"
+                onClick={() => { setMode(m); setErrors([]); }}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === m ? 'bg-blue-600 text-white' : 'text-slate-400'}`}
               >
                 {m === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
@@ -116,23 +165,63 @@ export function AuthScreen() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <AnimatePresence>
-              {mode === 'register' && (
+            <AnimatePresence mode="wait">
+              {mode === 'register' ? (
                 <motion.div
+                  key="register-fields"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
+                  className="space-y-3"
                 >
                   <Input
-                    label="Nombre Completo"
-                    placeholder="Juan Pérez"
-                    icon={<UserIcon className="w-4 h-4" />}
-                    value={name}
-                    onChange={e => setName(e.target.value)}
+                    label="Nombre de Usuario"
+                    placeholder="ej. juanperez99"
+                    icon={<AtSign className="w-4 h-4 text-slate-400" />}
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
                     required
                   />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label="Nombres"
+                      placeholder="Juan Carlos"
+                      icon={<UserIcon className="w-4 h-4 text-slate-400" />}
+                      value={firstName}
+                      onChange={e => setFirstName(e.target.value)}
+                      required
+                    />
+                    <Input
+                      label="Apellidos"
+                      placeholder="Pérez Gómez"
+                      icon={<UserIcon className="w-4 h-4 text-slate-400" />}
+                      value={lastName}
+                      onChange={e => setLastName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label="Cédula de Ciudadanía"
+                      placeholder="1098765432"
+                      icon={<IdCard className="w-4 h-4 text-slate-400" />}
+                      value={cedula}
+                      onChange={e => setCedula(e.target.value.replace(/\D/g, ''))}
+                      required
+                    />
+                    <Input
+                      label="Fecha de Nacimiento"
+                      type="date"
+                      icon={<Calendar className="w-4 h-4 text-slate-400" />}
+                      value={birthDate}
+                      onChange={e => setBirthDate(e.target.value)}
+                      required
+                    />
+                  </div>
                 </motion.div>
-              )}
+              ) : null}
             </AnimatePresence>
 
             <Input
@@ -155,52 +244,51 @@ export function AuthScreen() {
                 onChange={e => setPassword(e.target.value)}
                 required
               />
-              <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-9 text-slate-500 hover:text-slate-300">
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                className="absolute right-3 top-9 text-slate-500 hover:text-slate-300"
+              >
                 {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
 
+            {/* Pantalla y Contenedor de Posibles Errores */}
             <AnimatePresence>
-              {mode === 'register' && (
+              {errors.length > 0 && (
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-300 space-y-1"
                 >
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Tipo de Cuenta</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['CLIENT', 'BARBER', 'ADMIN'] as Role[]).map(r => (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => setRole(r)}
-                        className={`py-2 text-xs font-medium rounded-lg border transition-all ${role === r ? 'border-blue-500 bg-blue-500/10 text-blue-400' : 'border-white/10 text-slate-400'}`}
-                      >
-                        {roleLabels[r]}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-1.5 font-semibold text-red-400 mb-1">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>Se encontraron los siguientes errores:</span>
                   </div>
+                  <ul className="list-disc list-inside space-y-0.5 pl-1">
+                    {errors.map((err, idx) => (
+                      <li key={idx}>{err}</li>
+                    ))}
+                  </ul>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {error && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 rounded-lg px-3 py-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
-              </motion.div>
-            )}
-
             {mode === 'login' && (
               <div className="flex justify-end">
-                <button type="button" onClick={() => { setResetOpen(true); setResetMsg(''); }} className="text-xs text-blue-400 hover:text-blue-300">
+                <button
+                  type="button"
+                  onClick={() => { setResetOpen(true); setResetMsg(''); }}
+                  className="text-xs text-blue-400 hover:text-blue-300"
+                >
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
             )}
 
             <Button type="submit" fullWidth loading={loading} size="lg">
-              {mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
+              {mode === 'login' ? 'Iniciar Sesión' : 'Registrarme como Cliente'}
             </Button>
           </form>
 

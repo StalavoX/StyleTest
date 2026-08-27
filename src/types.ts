@@ -12,7 +12,7 @@ export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPL
 export type PaymentMethod = 'CASH' | 'CARD' | 'DIGITAL';
 
 /**
- * Modelo de Usuario genérico (puede ser Cliente, Barbero o Administrador)
+ * Modelo de Usuario genérico (Cliente, Barbero o Administrador)
  */
 export interface User {
   id: string;
@@ -20,12 +20,30 @@ export interface User {
   email: string;
   password: string;
   role: Role;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  cedula?: string;
+  birthDate?: string;
   phone?: string;
   avatar?: string;
   active?: boolean;
   workingHours?: WorkingHours[];
   specialties?: string[];
   rating?: number;
+}
+
+/**
+ * Estructura de datos para el registro de un nuevo cliente en la plataforma
+ */
+export interface RegisterData {
+  username: string;
+  firstName: string;
+  lastName: string;
+  cedula: string;
+  birthDate: string;
+  email: string;
+  password: string;
 }
 
 /**

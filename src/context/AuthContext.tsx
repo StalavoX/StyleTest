@@ -4,7 +4,7 @@
  * simulación de Google OAuth y restablecimiento de contraseña.
  */
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { User, Role } from '@/types';
+import type { User, Role, RegisterData } from '@/types';
 import { mockUsers } from '@/data/mockData';
 
 // Interfaz para el valor proveído por AuthContext
@@ -12,7 +12,7 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, password: string, role: Role) => Promise<{ success: boolean; error?: string }>;
+  register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: (email?: string) => Promise<void>;
   logout: () => void;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
@@ -52,14 +52,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { success: true };
   }, []);
 
-  // Registrar un nuevo usuario
-  const register = useCallback(async (name: string, email: string, password: string, role: Role) => {
+  // Registrar un nuevo usuario (públicamente solo rol CLIENTE por seguridad)
+  const register = useCallback(async (data: RegisterData) => {
+    const { username, firstName, lastName, cedula, birthDate, email, password } = data;
     if (mockUsers.some(u => u.email.toLowerCase() === email.toLowerCase())) {
       return { success: false, error: 'El correo electrónico ya se encuentra registrado' };
     }
+    if (mockUsers.some(u => u.username?.toLowerCase() === username.toLowerCase())) {
+      return { success: false, error: 'El nombre de usuario ya está en uso' };
+    }
+    if (mockUsers.some(u => u.cedula === cedula)) {
+      return { success: false, error: 'La cédula ingresada ya está registrada' };
+    }
+
+    const fullName = `${firstName.trim()} ${lastName.trim()}`;
     const newUser: User = {
       id: `u-${Date.now()}`,
-      name, email, password, role,
+      name: fullName,
+      username: username.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      cedula: cedula.trim(),
+      birthDate,
+      email: email.trim().toLowerCase(),
+      password,
+      role: 'CLIENT', // Estrictamente rol CLIENTE para registros públicos por seguridad
       avatar: `https://i.pravatar.cc/150?u=${email}`,
       active: true,
     };
