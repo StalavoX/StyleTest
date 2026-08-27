@@ -32,6 +32,8 @@ export function AuthScreen() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetMsg, setResetMsg] = useState('');
+  const [googleOpen, setGoogleOpen] = useState(false);
+  const [selectedGoogleEmail, setSelectedGoogleEmail] = useState<string | null>(null);
 
   // Procesa el envío del formulario de inicio de sesión o registro
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,11 +47,20 @@ export function AuthScreen() {
     if (!result.success) setError(result.error || 'Ocurrió un error inesperado');
   };
 
-  // Maneja el inicio de sesión con Google (Demo)
-  const handleGoogle = async () => {
-    setLoading(true);
-    await loginWithGoogle();
-    setLoading(false);
+  // Abre el popup simulado de Google para seleccionar cuenta
+  const handleGoogle = () => {
+    setGoogleOpen(true);
+    setSelectedGoogleEmail(null);
+  };
+
+  // Procesa la selección de una cuenta en el modal de Google
+  const handleSelectGoogleAccount = async (accountEmail: string) => {
+    setSelectedGoogleEmail(accountEmail);
+    setTimeout(async () => {
+      await loginWithGoogle(accountEmail);
+      setGoogleOpen(false);
+      setSelectedGoogleEmail(null);
+    }, 900);
   };
 
   // Procesa la solicitud de recuperación de contraseña
@@ -57,6 +68,12 @@ export function AuthScreen() {
     const r = await resetPassword(resetEmail);
     setResetMsg(r.success ? 'Se ha enviado un enlace de restablecimiento a tu correo' : r.error || 'Error');
   };
+
+  const googleAccounts = [
+    { name: 'Carlos Mendoza', email: 'carlos@email.com', role: 'Cliente', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' },
+    { name: 'Marco Reyes', email: 'marco@lunazul.com', role: 'Barbero', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' },
+    { name: 'Luna Azul Admin', email: 'admin@lunazul.com', role: 'Administrador', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80' },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
@@ -196,6 +213,7 @@ export function AuthScreen() {
 
           {/* Inicio de sesión rápido con Google */}
           <button
+            type="button"
             onClick={handleGoogle}
             disabled={loading}
             className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-white/15 text-slate-200 hover:bg-white/5 transition-colors disabled:opacity-50"
@@ -238,6 +256,68 @@ export function AuthScreen() {
           )}
           <Button fullWidth onClick={handleReset}>Enviar Enlace de Restablecimiento</Button>
         </div>
+      </Modal>
+
+      {/* Modal Simulado de Inicio de Sesión con Google */}
+      <Modal open={googleOpen} onClose={() => !selectedGoogleEmail && setGoogleOpen(false)} title="" size="sm">
+        <div className="text-center pb-2">
+          {/* Logo Google oficial */}
+          <div className="flex justify-center mb-3">
+            <svg className="w-10 h-10" viewBox="0 0 48 48">
+              <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+              <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/>
+              <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+              <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+            </svg>
+          </div>
+
+          <h3 className="text-xl font-semibold text-white">Elige una cuenta</h3>
+          <p className="text-xs text-slate-400 mt-1">para continuar en <span className="text-blue-400 font-medium">Barbería Luna Azul</span></p>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {googleAccounts.map(acc => {
+            const isLoading = selectedGoogleEmail === acc.email;
+            return (
+              <button
+                key={acc.email}
+                disabled={!!selectedGoogleEmail}
+                onClick={() => handleSelectGoogleAccount(acc.email)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                  isLoading
+                    ? 'border-blue-500 bg-blue-500/10'
+                    : 'border-white/10 hover:border-white/20 hover:bg-white/5 text-white'
+                }`}
+              >
+                <img src={acc.avatar} alt={acc.name} className="w-10 h-10 rounded-full object-cover shrink-0 border border-white/20" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-white truncate">{acc.name}</p>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-medium">
+                      {acc.role}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 truncate">{acc.email}</p>
+                </div>
+                {isLoading && (
+                  <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {selectedGoogleEmail ? (
+          <div className="mt-4 pt-3 border-t border-white/10 text-center">
+            <p className="text-xs text-blue-400 animate-pulse">Autenticando cuenta con Google OAuth...</p>
+          </div>
+        ) : (
+          <div className="mt-4 pt-3 border-t border-white/10 flex justify-end">
+            <Button variant="ghost" size="sm" onClick={() => setGoogleOpen(false)}>
+              Cancelar
+            </Button>
+          </div>
+        )}
       </Modal>
     </div>
   );

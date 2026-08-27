@@ -13,7 +13,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string, role: Role) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: (email?: string) => Promise<void>;
   logout: () => void;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
 }
@@ -68,10 +68,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { success: true };
   }, []);
 
-  // Simulación de inicio de sesión rápido con Google OAuth
-  const loginWithGoogle = useCallback(async () => {
-    const demo = mockUsers.find(u => u.role === 'CLIENT')!;
-    const { password: _, ...safe } = demo;
+  // Simulación de inicio de sesión con Google OAuth (permite elegir cuenta)
+  const loginWithGoogle = useCallback(async (email?: string) => {
+    const found = email ? mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase()) : null;
+    const target = found || mockUsers.find(u => u.role === 'CLIENT') || mockUsers[0];
+    const { password: _, ...safe } = target;
     persist(safe as User);
   }, []);
 
