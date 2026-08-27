@@ -10,6 +10,8 @@ import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { formatCurrency } from '@/utils/format';
 import type { Service, Barber } from '@/types';
 
 interface BookingFlowProps {
@@ -125,11 +127,11 @@ export function BookingFlow({ onClose }: BookingFlowProps) {
           <motion.div key="service" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3 max-h-[50vh] overflow-y-auto">
             {services.map(s => (
               <Card key={s.id} hover onClick={() => { setService(s); setStep('barber'); }} className="p-4 flex gap-4">
-                <img src={s.image} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                <ImageWithFallback src={s.image} alt={s.name} fallbackType="service" fallbackText={s.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <h4 className="font-semibold text-white">{s.name}</h4>
-                    <span className="text-blue-400 font-bold">${s.price}</span>
+                    <span className="text-blue-400 font-bold">{formatCurrency(s.price)}</span>
                   </div>
                   <p className="text-sm text-slate-400 mt-0.5 line-clamp-2">{s.description}</p>
                   <div className="flex items-center gap-1 text-xs text-slate-500 mt-2">
@@ -146,7 +148,7 @@ export function BookingFlow({ onClose }: BookingFlowProps) {
           <motion.div key="barber" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3">
             {activeBarbers.map(b => (
               <Card key={b.id} hover onClick={() => { setBarber(b); setStep('datetime'); }} className="p-4 flex items-center gap-4">
-                <img src={b.avatar} alt="" className="w-14 h-14 rounded-full" />
+                <ImageWithFallback src={b.avatar} alt={b.name} fallbackType="avatar" fallbackText={b.name} className="w-14 h-14 rounded-full object-cover shrink-0" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-white">{b.name}</h4>
@@ -238,14 +240,14 @@ export function BookingFlow({ onClose }: BookingFlowProps) {
           <motion.div key="confirm" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
             <Card className="p-5 space-y-4">
               <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-                <img src={service.image} alt="" className="w-14 h-14 rounded-xl object-cover" />
+                <ImageWithFallback src={service.image} alt={service.name} fallbackType="service" fallbackText={service.name} className="w-14 h-14 rounded-xl object-cover" />
                 <div>
                   <h4 className="font-semibold text-white">{service.name}</h4>
-                  <p className="text-sm text-slate-400">{service.durationMin} min · ${service.price}</p>
+                  <p className="text-sm text-slate-400">{service.durationMin} min · {formatCurrency(service.price)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-                <img src={barber.avatar} alt="" className="w-12 h-12 rounded-full" />
+                <ImageWithFallback src={barber.avatar} alt={barber.name} fallbackType="avatar" fallbackText={barber.name} className="w-12 h-12 rounded-full object-cover" />
                 <div>
                   <h4 className="font-medium text-white">{barber.name}</h4>
                   <div className="flex items-center gap-1 text-xs text-amber-400"><Star className="w-3 h-3 fill-current" /> {barber.rating}</div>

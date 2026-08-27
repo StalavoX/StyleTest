@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { Input, Select } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import type { User, Role } from '@/types';
 
 // Formulario inicial para el alta de miembros del equipo
@@ -41,7 +42,7 @@ export function AdminStaff() {
     if (editing) {
       updateUser({ ...editing, name: form.name, email: form.email, role: form.role, phone: form.phone, specialties });
     } else {
-      addUser({ name: form.name, email: form.email, password: form.password || 'pass123', role: form.role, phone: form.phone, avatar: `https://i.pravatar.cc/150?u=${form.email}`, active: true, specialties, rating: 4.5 });
+      addUser({ name: form.name, email: form.email, password: form.password || 'pass123', role: form.role, phone: form.phone, avatar: `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80`, active: true, specialties, rating: 4.5 });
     }
     setModalOpen(false);
   };
@@ -64,7 +65,7 @@ export function AdminStaff() {
             <motion.div key={u.id} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
               <Card className="p-4">
                 <div className="flex items-start gap-3 mb-3">
-                  <img src={u.avatar} alt="" className="w-12 h-12 rounded-full" />
+                  <ImageWithFallback src={u.avatar} alt={u.name} fallbackType="avatar" fallbackText={u.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="font-semibold text-white truncate">{u.name}</h4>

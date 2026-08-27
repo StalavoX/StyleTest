@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
+import { formatCurrency } from '@/utils/format';
 import type { Product } from '@/types';
 
 // Formulario inicial vacío para nuevos productos
@@ -91,7 +92,7 @@ export function AdminInventory() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-slate-300">{p.category}</td>
-                    <td className="px-4 py-3 text-blue-400 font-medium">${p.price}</td>
+                    <td className="px-4 py-3 text-blue-400 font-medium">{formatCurrency(p.price)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className={p.stockActual <= p.stockMinimo ? 'text-red-400 font-medium' : 'text-white'}>{p.stockActual}</span>
@@ -129,7 +130,7 @@ export function AdminInventory() {
                   <p className="text-xs text-slate-500">{p.brand} · {p.category}</p>
                 </div>
               </div>
-              <span className="text-blue-400 font-bold">${p.price}</span>
+              <span className="text-blue-400 font-bold">{formatCurrency(p.price)}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -159,7 +160,7 @@ export function AdminInventory() {
             <Input label="Categoría" placeholder="Cabello, Barba..." value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} />
             <Input label="Marca" placeholder="Nombre de la marca" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} />
           </div>
-          <Input label="Precio ($)" type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })} />
+          <Input label="Precio (COP)" type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })} />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Stock Actual" type="number" value={form.stockActual} onChange={e => setForm({ ...form, stockActual: Number(e.target.value) })} />
             <Input label="Stock Mínimo" type="number" value={form.stockMinimo} onChange={e => setForm({ ...form, stockMinimo: Number(e.target.value) })} />

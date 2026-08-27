@@ -8,6 +8,7 @@ import { DollarSign, Calendar as CalendarIcon, Scissors, AlertTriangle, Trending
 import { useData } from '@/context/DataContext';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { formatCurrency } from '@/utils/format';
 
 export function AdminDashboard() {
   const { appointments, products, sales, barbers } = useData();
@@ -22,7 +23,7 @@ export function AdminDashboard() {
 
   // Tarjetas métricas estadísticas principales
   const stats = [
-    { label: "Ingresos de Hoy", value: `$${todayRevenue}`, icon: <DollarSign className="w-5 h-5" />, color: 'text-emerald-400', bg: 'bg-emerald-600/15' },
+    { label: "Ingresos de Hoy", value: formatCurrency(todayRevenue), icon: <DollarSign className="w-5 h-5" />, color: 'text-emerald-400', bg: 'bg-emerald-600/15' },
     { label: "Citas de Hoy", value: todayAppts.length, icon: <CalendarIcon className="w-5 h-5" />, color: 'text-blue-400', bg: 'bg-blue-600/15' },
     { label: 'Barberos Activos', value: activeBarbers.length, icon: <Scissors className="w-5 h-5" />, color: 'text-indigo-400', bg: 'bg-indigo-600/15' },
     { label: 'Alertas Stock Bajo', value: lowStock.length, icon: <AlertTriangle className="w-5 h-5" />, color: 'text-amber-400', bg: 'bg-amber-600/15' },

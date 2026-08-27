@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { formatCurrency } from '@/utils/format';
 import type { AppointmentStatus } from '@/types';
 
 // Iconos asociables a cada estado de cita
@@ -71,7 +72,7 @@ export function ClientAppointments() {
                         <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
                           <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(a.date + 'T00:00').toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}</span>
                           <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {a.time}</span>
-                          <span className="text-blue-400 font-medium">${a.price}</span>
+                          <span className="text-blue-400 font-medium">{formatCurrency(a.price)}</span>
                         </div>
                       </div>
                     </div>

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
+import { formatCurrency } from '@/utils/format';
 import type { SaleItem, PaymentMethod, Sale } from '@/types';
 
 // Traducciones para métodos de pago
@@ -47,7 +48,7 @@ export function AdminSales() {
           <div className="w-10 h-10 rounded-xl bg-emerald-600/15 flex items-center justify-center text-emerald-400 mb-2">
             <DollarSign className="w-5 h-5" />
           </div>
-          <p className="text-xl font-bold text-white">${todayTotal}</p>
+          <p className="text-xl font-bold text-white">{formatCurrency(todayTotal)}</p>
           <p className="text-xs text-slate-400">Total de Hoy</p>
         </Card>
         <Card className="p-4">
@@ -78,13 +79,13 @@ export function AdminSales() {
                     <Badge status={s.type} />
                     <Badge status={s.paymentMethod} />
                   </div>
-                  <span className="text-emerald-400 font-bold">${s.total}</span>
+                  <span className="text-emerald-400 font-bold">{formatCurrency(s.total)}</span>
                 </div>
                 <div className="space-y-1">
                   {s.items.map((item, i) => (
                     <div key={i} className="flex items-center justify-between text-sm">
                       <span className="text-slate-300">{item.qty}× {item.name}</span>
-                      <span className="text-slate-400">${item.price * item.qty}</span>
+                      <span className="text-slate-400">{formatCurrency(item.price * item.qty)}</span>
                     </div>
                   ))}
                 </div>
@@ -167,7 +168,7 @@ function SaleRegister({ open, onClose, services, products, onAdd, user }: SaleRe
                   <p className="text-sm text-white font-medium">{s.name}</p>
                   <p className="text-xs text-slate-500">{s.durationMin} min</p>
                 </div>
-                <span className="text-blue-400 font-medium">${s.price}</span>
+                <span className="text-blue-400 font-medium">{formatCurrency(s.price)}</span>
               </button>
             ))
           ) : (
@@ -177,7 +178,7 @@ function SaleRegister({ open, onClose, services, products, onAdd, user }: SaleRe
                   <p className="text-sm text-white font-medium">{p.name}</p>
                   <p className="text-xs text-slate-500">Stock: {p.stockActual}</p>
                 </div>
-                <span className="text-blue-400 font-medium">${p.price}</span>
+                <span className="text-blue-400 font-medium">{formatCurrency(p.price)}</span>
               </button>
             ))
           )}
@@ -196,10 +197,10 @@ function SaleRegister({ open, onClose, services, products, onAdd, user }: SaleRe
                 <div key={i} className="flex items-center justify-between p-2 bg-slate-900/40 rounded-lg">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white truncate">{item.name}</p>
-                    <p className="text-xs text-slate-500">{item.qty}× ${item.price}</p>
+                    <p className="text-xs text-slate-500">{item.qty}× {formatCurrency(item.price)}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-white font-medium">${item.price * item.qty}</span>
+                    <span className="text-sm text-white font-medium">{formatCurrency(item.price * item.qty)}</span>
                     <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-300"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
@@ -225,7 +226,7 @@ function SaleRegister({ open, onClose, services, products, onAdd, user }: SaleRe
       <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/10">
         <div>
           <p className="text-xs text-slate-500">Total a Pagar</p>
-          <p className="text-2xl font-bold text-emerald-400">${total}</p>
+          <p className="text-2xl font-bold text-emerald-400">{formatCurrency(total)}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => { setItems([]); onClose(); }}>Cancelar</Button>

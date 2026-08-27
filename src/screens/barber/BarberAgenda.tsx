@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
+import { formatCurrency } from '@/utils/format';
 import type { Appointment, AppointmentStatus } from '@/types';
 
 // Nombres cortos de días en español para la barra de navegación semanal
@@ -149,7 +150,7 @@ export function BarberAgenda() {
                             <Badge status={a.status} />
                           </div>
                           <p className="text-sm text-slate-400">{a.clientName}</p>
-                          <p className="text-xs text-blue-400 font-medium mt-0.5">${a.price}</p>
+                          <p className="text-xs text-blue-400 font-medium mt-0.5">{formatCurrency(a.price)}</p>
                         </div>
                         {/* Botón de cambio de estado */}
                         {action && (

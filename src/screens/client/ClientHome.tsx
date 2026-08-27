@@ -10,6 +10,8 @@ import { useData } from '@/context/DataContext';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { formatCurrency } from '@/utils/format';
 import { BookingFlow } from './BookingFlow';
 
 // Mapeo de categorías a español para los filtros
@@ -57,7 +59,7 @@ export function ClientHome() {
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
           {activeBarbers.map(b => (
             <Card key={b.id} className="p-4 min-w-[140px] text-center">
-              <img src={b.avatar} alt="" className="w-14 h-14 rounded-full mx-auto mb-2" />
+              <ImageWithFallback src={b.avatar} alt={b.name} fallbackType="avatar" fallbackText={b.name} className="w-14 h-14 rounded-full mx-auto mb-2 object-cover" />
               <p className="text-sm font-medium text-white">{b.name}</p>
               <div className="flex items-center justify-center gap-1 text-xs text-amber-400 mt-1">
                 <Star className="w-3 h-3 fill-current" /> {b.rating}
@@ -88,11 +90,11 @@ export function ClientHome() {
           {filtered.map(s => (
             <motion.div key={s.id} layout>
               <Card className="p-4 flex gap-3">
-                <img src={s.image} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                <ImageWithFallback src={s.image} alt={s.name} fallbackType="service" fallbackText={s.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <h4 className="font-semibold text-white text-sm">{s.name}</h4>
-                    <span className="text-blue-400 font-bold text-sm">${s.price}</span>
+                    <span className="text-blue-400 font-bold text-sm">{formatCurrency(s.price)}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{s.description}</p>
                   <div className="flex items-center gap-1 text-xs text-slate-500 mt-2">

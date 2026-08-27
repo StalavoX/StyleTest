@@ -8,6 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { formatCurrency } from '@/utils/format';
 
 // Diccionario de etiquetas traducidas para los roles de usuario
 const roleLabels = {
@@ -33,7 +35,7 @@ export function ProfileScreen() {
     <div className="space-y-5">
       {/* Encabezado del perfil con avatar y rol */}
       <Card className="p-6 text-center">
-        <img src={user.avatar} alt="" className="w-20 h-20 rounded-full mx-auto mb-3" />
+        <ImageWithFallback src={user.avatar} alt={user.name} fallbackType="avatar" fallbackText={user.name} className="w-20 h-20 rounded-full mx-auto mb-3 object-cover" />
         <h2 className="text-xl font-bold text-white">{user.name}</h2>
         <div className="flex items-center justify-center gap-2 mt-1">
           <span className="flex items-center gap-1 text-sm text-blue-400">{roleIcon} {roleLabels[user.role]}</span>
@@ -69,7 +71,7 @@ export function ProfileScreen() {
           </Card>
           <Card className="p-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-600/15 flex items-center justify-center text-emerald-400 mb-2"><DollarSign className="w-5 h-5" /></div>
-            <p className="text-2xl font-bold text-white">${myRevenue}</p>
+            <p className="text-2xl font-bold text-white">{formatCurrency(myRevenue)}</p>
             <p className="text-xs text-slate-400">Ingresos Generados</p>
           </Card>
         </div>
@@ -85,7 +87,7 @@ export function ProfileScreen() {
           </Card>
           <Card className="p-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-600/15 flex items-center justify-center text-emerald-400 mb-2"><DollarSign className="w-5 h-5" /></div>
-            <p className="text-xl font-bold text-white">${sales.reduce((s, x) => s + x.total, 0)}</p>
+            <p className="text-xl font-bold text-white">{formatCurrency(sales.reduce((s, x) => s + x.total, 0))}</p>
             <p className="text-xs text-slate-400">Ventas Totales</p>
           </Card>
           <Card className="p-4">

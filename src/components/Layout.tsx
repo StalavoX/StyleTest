@@ -7,6 +7,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Calendar, Package, User as UserIcon, Scissors, ShoppingBag, Users, LayoutDashboard, LogOut, Clock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import type { Role } from '@/types';
 
 // Claves de navegación disponibles
@@ -105,7 +106,7 @@ export function Layout({ active, onNavigate, children }: LayoutProps) {
         </nav>
         <div className="px-3 py-4 border-t border-white/10">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <img src={user.avatar} alt="" className="w-9 h-9 rounded-full" />
+            <ImageWithFallback src={user.avatar} alt={user.name} fallbackType="avatar" fallbackText={user.name} className="w-9 h-9 rounded-full object-cover shrink-0" />
             <div className="min-w-0">
               <p className="text-sm font-medium text-white truncate">{user.name}</p>
               <p className="text-xs text-slate-500 truncate">{user.email}</p>
@@ -129,7 +130,7 @@ export function Layout({ active, onNavigate, children }: LayoutProps) {
             <h1 className="text-white font-bold">Luna Azul</h1>
           </div>
           <div className="flex items-center gap-2">
-            <img src={user.avatar} alt="" className="w-8 h-8 rounded-full" />
+            <ImageWithFallback src={user.avatar} alt={user.name} fallbackType="avatar" fallbackText={user.name} className="w-8 h-8 rounded-full object-cover shrink-0" />
           </div>
         </header>
 
